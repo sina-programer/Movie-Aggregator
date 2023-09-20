@@ -174,6 +174,13 @@ class IMDB(WebDriver):
         data.dump()
 
 
+
+def get_movie_name(name):
+    if ' - ' in name:
+        return name.split(' - ', 1)[0]
+    return os.path.splitext(name)[0]
+
+
 CONFIG_PATH = 'config.ini'
 
 if __name__ == "__main__":
@@ -188,7 +195,7 @@ if __name__ == "__main__":
 
     PATH = config['General']['PATH']
     MAX_THREADS = int(config['General']['MAX_THREADS'])
-    TITLES = list(map(lambda p: p.split(' - ', 1)[0], os.listdir(PATH)))
+    TITLES = list(map(get_movie_name, os.listdir(PATH)))
     NAMES = TITLES.copy()
 
     if MAX_THREADS == 0:
