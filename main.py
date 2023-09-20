@@ -10,6 +10,7 @@ from concurrent import futures
 from threading import Thread
 import pygetwindow as gw
 import datetime as dt
+import configparser
 import requests
 import time
 import json
@@ -174,23 +175,22 @@ class IMDB(WebDriver):
 
 
 
-MAX_THREADS = 10
-TITLES = [
-    'Game Of Thrones',
-    'Squid Game',
-    'Wednesday',
-    'Batman 2022'
-]
-NAMES = TITLES.copy()
-
-
 if __name__ == "__main__":
     options = ['ignore-certificate-errors', 'ignore-ssl-errors']
+    config = configparser.ConfigParser()
+    config.read('config.ini')
+
+    PATH = config['General']['PATH']
+    MAX_THREADS = int(config['General']['MAX_THREADS'])
+    TITLES = list(map(lambda p: p.split(' - ', 1)[0], os.listdir(PATH)))
+    NAMES = TITLES.copy()
+
+    if MAX_THREADS == 0:
+        MAX_THREADS = len(TITLES)
 
     with futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
         for title in TITLES:
             executor.submit(IMDB(options).crawl, title)
-            # executor.result()  # return the result
 
     print(f"All below movies are done!")
     print(NAMES)
