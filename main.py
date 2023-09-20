@@ -174,11 +174,17 @@ class IMDB(WebDriver):
         data.dump()
 
 
+CONFIG_PATH = 'config.ini'
 
 if __name__ == "__main__":
     options = ['ignore-certificate-errors', 'ignore-ssl-errors']
     config = configparser.ConfigParser()
-    config.read('config.ini')
+
+    if os.path.exists(CONFIG_PATH):
+        config.read(CONFIG_PATH)
+    else:
+        print(f'ERROR: the file {CONFIG_PATH} does not exist!')
+        exit()
 
     PATH = config['General']['PATH']
     MAX_THREADS = int(config['General']['MAX_THREADS'])
@@ -187,6 +193,10 @@ if __name__ == "__main__":
 
     if MAX_THREADS == 0:
         MAX_THREADS = len(TITLES)
+
+    if not os.path.exists(PATH):
+        print(f"ERROR: the path you want to scrape is not available! ({CONFIG_PATH}[General][PATH])")
+        exit()
 
     with futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
         for title in TITLES:
