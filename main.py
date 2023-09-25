@@ -5,6 +5,7 @@ from selenium.webdriver.common.by import By
 from selenium import webdriver
 
 from abc import ABC, abstractmethod
+from googletrans import Translator
 from collections import UserDict
 from concurrent import futures
 from threading import Thread
@@ -164,7 +165,9 @@ class IMDB(WebDriver):
 
         data = Json(os.path.join(folder_path, 'data.json'), encoding=ENCODING)
         data['name'] = name
+        data['name-fa'] = translator.translate(data['name'], dest='fa').text
         data['genres'] = IMDB.get_genres(self.driver)
+        data['genres-fa'] = list(map(lambda clause: translator.translate(clause, dest='fa').text, data['genres']))
         data['rating'] = IMDB.get_rating(self.driver)
         data['year'] = IMDB.get_year(self.driver)
         data['cover-path'] = os.path.join(folder_path, 'cover.png')
@@ -212,6 +215,8 @@ def get_movie_name(name):
 
 CONFIG_PATH = 'config.ini'
 ENCODING = 'utf-8'
+
+translator = Translator()
 
 if __name__ == "__main__":
     options = ['ignore-certificate-errors', 'ignore-ssl-errors']
