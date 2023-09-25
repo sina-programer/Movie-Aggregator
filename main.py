@@ -20,11 +20,12 @@ import os
 # https://chromedriver.chromium.org/downloads  # with VPN
 
 class Json(UserDict):
-    def __init__(self, path, create_template=True):
+    def __init__(self, path, create_template=True, encoding=None):
         super().__init__()
 
         self.data = {}
         self.path = path
+        self.encoding = encoding
 
         if create_template:
             self.dump()
@@ -36,20 +37,27 @@ class Json(UserDict):
         for idx in range(len(keys)):
             self[keys[idx]] = values[idx]
 
-    def dump(self, path=None):
-        return Json._dump(self.data, path if path else self.path)
+    def dump(self, path=None, encoding=None):
+        return Json._dump(
+            self.data,
+            path if path else self.path,
+            encoding=encoding if encoding else self.encoding
+        )
 
-    def load(self, path=None):
-        self.data = Json._load(path if path else self.path)
+    def load(self, path=None, encoding=None):
+        self.data = Json._load(
+            path if path else self.path,
+            encoding=encoding if encoding else self.encoding
+        )
 
     @classmethod
-    def _dump(cls, obj, path):
-        with open(path, 'w') as handler:
+    def _dump(cls, obj, path, encoding=None):
+        with open(path, 'w', encoding=encoding) as handler:
             return json.dump(obj, handler, indent=4)
 
     @classmethod
-    def _load(cls, path):
-        with open(path) as handler:
+    def _load(cls, path, encoding=None):
+        with open(path, encoding=encoding) as handler:
             return json.load(handler)
 
     def __setitem__(self, key, value):
@@ -144,6 +152,7 @@ class IMDB(WebDriver):
         self.go(page_url)
 
         # The main movie page
+        print(f"The page of <{title}> is loaded successfully!")
         name = IMDB.get_name(self.driver)
         folder_path = os.path.join(PATH, name)
         if not os.path.exists(folder_path):
@@ -153,7 +162,7 @@ class IMDB(WebDriver):
         NAMES[idx] = name
         filename = FILES[idx]
 
-        data = Json(os.path.join(folder_path, 'data.json'))
+        data = Json(os.path.join(folder_path, 'data.json'), encoding=ENCODING)
         data['name'] = name
         data['genres'] = IMDB.get_genres(self.driver)
         data['rating'] = IMDB.get_rating(self.driver)
