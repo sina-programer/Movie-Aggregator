@@ -163,6 +163,9 @@ class IMDB(WebDriver):
         rating = self.driver.find_element(By.XPATH, r"//a[@aria-label='View User Ratings']/span/div/div[2]/div/span").text
         data['rating'] = rating
 
+        year = self.driver.find_elements(By.TAG_NAME, 'ul')[13].find_element(By.TAG_NAME, 'a').text
+        data['year'] = year
+
         cover_path = os.path.join(folder_path, 'cover.png')
         data['cover-path'] = cover_path
         # self.driver.find_element(By.CLASS_NAME, 'ipc-poster').screenshot(cover_path)
