@@ -221,7 +221,7 @@ def get_movie_name(name):
 
 
 CONFIG_PATH = 'config.ini'
-ENCODING = 'utf-8'
+ENCODING = 'utf-8'  # the alternative: 'iso-8859-1'
 
 translator = Translator()
 
@@ -240,12 +240,6 @@ if __name__ == "__main__":
     MAX_THREADS = int(config['General']['MAX_THREADS'])
     CHROME_VERSION = config['General']['CHROME_VERSION']
     EXECUTABLE_PATH = os.path.join('Files', f'chromedriver{CHROME_VERSION}.exe')
-    FILES = os.listdir(PATH)
-    TITLES = list(map(get_movie_name, FILES))
-    NAMES = TITLES.copy()
-
-    if MAX_THREADS == 0:
-        MAX_THREADS = len(TITLES)
 
     if not os.path.exists(PATH):
         print(f"ERROR: the path you want to scrape is not available!  <{PATH}>  ({CONFIG_PATH}[General][PATH])")
@@ -254,6 +248,13 @@ if __name__ == "__main__":
     if not os.path.exists(EXECUTABLE_PATH):
         print(f"ERROR: the chrome driver path you want to use, doesn't exist!  <{EXECUTABLE_PATH}>")
         exit()
+
+    FILES = os.listdir(PATH)
+    TITLES = list(map(get_movie_name, FILES))
+    NAMES = TITLES.copy()
+
+    if MAX_THREADS == 0:
+        MAX_THREADS = len(TITLES)
 
     with futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
         for title in TITLES:
