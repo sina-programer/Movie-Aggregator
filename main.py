@@ -10,7 +10,6 @@ from collections import UserDict
 from concurrent import futures
 from threading import Thread
 import pygetwindow as gw
-import datetime as dt
 import configparser
 import requests
 import shutil
@@ -150,10 +149,10 @@ class IMDB(WebDriver):
         self.driver.find_element(By.ID, "suggestion-search").send_keys(title)
         self.driver.find_element(By.ID, "suggestion-search-button").click()
         page_url = self.driver.find_element(By.CLASS_NAME, "ipc-metadata-list").find_element(By.TAG_NAME, 'li').find_element(By.TAG_NAME, 'a').get_attribute('href')
-        self.go(page_url)
+        self.go(page_url)  # The main movie page
 
-        # The main movie page
-        print(f"The page of <{title}> is loaded successfully!")
+
+        print(f"\nThe page of <{title}> is loaded successfully!\n")
         name = IMDB.get_name(self.driver)
         folder_path = os.path.join(PATH, name)
         if not os.path.exists(folder_path):
@@ -172,6 +171,7 @@ class IMDB(WebDriver):
         data['year'] = IMDB.get_year(self.driver)
         data['cover-path'] = os.path.join(folder_path, 'cover.png')
 
+        # save the cover
         # self.driver.find_element(By.CLASS_NAME, 'ipc-poster').screenshot(cover_path)
         self.driver.find_element(By.CLASS_NAME, 'ipc-poster').click()
         self.wait(2)
@@ -179,8 +179,9 @@ class IMDB(WebDriver):
         while not self.download(cover.get_attribute('src'), data['cover-path']):
             time.sleep(1)
 
-        data.dump()
+        data.dump()  # finally ensuring save of data
 
+        # move the movie into created folder
         source = os.path.join(PATH, filename)
         destination = os.path.join(folder_path, filename)
         Thread(target=shutil.move, args=(source, destination)).start()
@@ -197,13 +198,13 @@ class IMDB(WebDriver):
 
     @classmethod
     def get_rating(cls, driver):
-        return driver.find_element(By.XPATH, r"//a[@aria-label='View User Ratings']/span/div/div[2]/div/span").text
+        return float(driver.find_element(By.XPATH, r"//a[@aria-label='View User Ratings']/span/div/div[2]/div/span").text)
 
     @classmethod
     def get_year(cls, driver):
         ULs = driver.find_elements(By.TAG_NAME, 'ul')
         a = ULs[13].find_element(By.TAG_NAME, 'a')
-        return a.text
+        return int(a.text)
 
 
 
