@@ -188,7 +188,7 @@ class IMDB(WebDriver):
 
     @classmethod
     def get_genres(cls, driver):
-        genres = self.driver.find_element(By.CLASS_NAME, 'ipc-chip-list').find_elements(By.TAG_NAME, 'span')
+        genres = driver.find_element(By.CLASS_NAME, 'ipc-chip-list').find_elements(By.TAG_NAME, 'span')
         genres = list(map(lambda span: span.text, genres))
         return genres
 
