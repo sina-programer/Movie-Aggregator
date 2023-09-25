@@ -190,13 +190,15 @@ def get_movie_name(name):
 
 
 CONFIG_PATH = 'config.ini'
+ENCODING = 'utf-8'
 
 if __name__ == "__main__":
     options = ['ignore-certificate-errors', 'ignore-ssl-errors']
     config = configparser.ConfigParser()
 
     if os.path.exists(CONFIG_PATH):
-        config.read(CONFIG_PATH)
+        config.read(CONFIG_PATH, encoding=ENCODING)
+        print(f"Configs are successfully imported from: <{CONFIG_PATH}>")
     else:
         print(f'ERROR: the file {CONFIG_PATH} does not exist!')
         exit()
