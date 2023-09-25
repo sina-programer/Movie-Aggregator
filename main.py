@@ -144,7 +144,7 @@ class IMDB(WebDriver):
         self.go(page_url)
 
         # The main movie page
-        name = self.driver.find_element(By.TAG_NAME, 'h1').text
+        name = IMDB.get_name(self.driver)
         folder_path = os.path.join(PATH, name)
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
@@ -155,24 +155,16 @@ class IMDB(WebDriver):
 
         data = Json(os.path.join(folder_path, 'data.json'))
         data['name'] = name
+        data['genres'] = IMDB.get_genres(self.driver)
+        data['rating'] = IMDB.get_rating(self.driver)
+        data['year'] = IMDB.get_year(self.driver)
+        data['cover-path'] = os.path.join(folder_path, 'cover.png')
 
-        genres = self.driver.find_element(By.CLASS_NAME, 'ipc-chip-list').find_elements(By.TAG_NAME, 'span')
-        genres = list(map(lambda span: span.text, genres))
-        data['genres'] = genres
-
-        rating = self.driver.find_element(By.XPATH, r"//a[@aria-label='View User Ratings']/span/div/div[2]/div/span").text
-        data['rating'] = rating
-
-        year = self.driver.find_elements(By.TAG_NAME, 'ul')[13].find_element(By.TAG_NAME, 'a').text
-        data['year'] = year
-
-        cover_path = os.path.join(folder_path, 'cover.png')
-        data['cover-path'] = cover_path
         # self.driver.find_element(By.CLASS_NAME, 'ipc-poster').screenshot(cover_path)
         self.driver.find_element(By.CLASS_NAME, 'ipc-poster').click()
         self.wait(2)
         cover = self.driver.find_element(By.CLASS_NAME, 'media-viewer').find_element(By.TAG_NAME, 'img')
-        while not self.download(cover.get_attribute('src'), cover_path):
+        while not self.download(cover.get_attribute('src'), data['cover-path']):
             time.sleep(1)
 
         data.dump()
@@ -180,6 +172,26 @@ class IMDB(WebDriver):
         source = os.path.join(PATH, filename)
         destination = os.path.join(folder_path, filename)
         Thread(target=shutil.move, args=(source, destination)).start()
+
+    @classmethod
+    def get_name(cls, driver):
+        return driver.find_element(By.TAG_NAME, 'h1').text
+
+    @classmethod
+    def get_genres(cls, driver):
+        genres = self.driver.find_element(By.CLASS_NAME, 'ipc-chip-list').find_elements(By.TAG_NAME, 'span')
+        genres = list(map(lambda span: span.text, genres))
+        return genres
+
+    @classmethod
+    def get_rating(cls, driver):
+        return driver.find_element(By.XPATH, r"//a[@aria-label='View User Ratings']/span/div/div[2]/div/span").text
+
+    @classmethod
+    def get_year(cls, driver):
+        ULs = driver.find_elements(By.TAG_NAME, 'ul')
+        a = ULs[13].find_element(By.TAG_NAME, 'a')
+        return a.text
 
 
 
