@@ -59,10 +59,10 @@ class Json(UserDict):
 
 class WebDriver(ABC):
     # EXECUTABLE_PATH = ChromeDriverManager().install()
-    EXECUTABLE_PATH = r"Files\chromedriver117.exe"
 
-    def __init__(self, options=[]):
-        self.service = Service(WebDriver.EXECUTABLE_PATH)
+    def __init__(self, executable_path, options=[]):
+        self.executable_path = executable_path
+        self.service = Service(self.executable_path)
         self.options = Options()
         for option in options:
             self.options.add_argument(option)
@@ -205,6 +205,8 @@ if __name__ == "__main__":
 
     PATH = os.path.normpath(config['General']['PATH'])
     MAX_THREADS = int(config['General']['MAX_THREADS'])
+    CHROME_VERSION = config['General']['CHROME_VERSION']
+    EXECUTABLE_PATH = os.path.join('Files', f'chromedriver{CHROME_VERSION}.exe')
     FILES = os.listdir(PATH)
     TITLES = list(map(get_movie_name, FILES))
     NAMES = TITLES.copy()
@@ -213,12 +215,16 @@ if __name__ == "__main__":
         MAX_THREADS = len(TITLES)
 
     if not os.path.exists(PATH):
-        print(f"ERROR: the path you want to scrape is not available! ({CONFIG_PATH}[General][PATH])")
+        print(f"ERROR: the path you want to scrape is not available!  <{PATH}>  ({CONFIG_PATH}[General][PATH])")
+        exit()
+
+    if not os.path.exists(EXECUTABLE_PATH):
+        print(f"ERROR: the chrome driver path you want to use, doesn't exist!  <{EXECUTABLE_PATH}>")
         exit()
 
     with futures.ThreadPoolExecutor(max_workers=MAX_THREADS) as executor:
         for title in TITLES:
-            executor.submit(IMDB(options).crawl, title)
+            executor.submit(IMDB(EXECUTABLE_PATH, options).crawl, title)
 
     print(f"All below movies are done!")
     print(NAMES)
