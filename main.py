@@ -20,12 +20,13 @@ import os
 # https://chromedriver.chromium.org/downloads  # with VPN
 
 class Json(UserDict):
-    def __init__(self, path, create_template=True, encoding=None):
+    def __init__(self, path, create_template=True, encoding=None, ensure_ascii=False):
         super().__init__()
 
         self.data = {}
         self.path = path
         self.encoding = encoding
+        self.ensure_ascii = ensure_ascii
 
         if create_template:
             self.dump()
@@ -37,28 +38,31 @@ class Json(UserDict):
         for idx in range(len(keys)):
             self[keys[idx]] = values[idx]
 
-    def dump(self, path=None, encoding=None):
+    def dump(self, path=None, encoding=None, ensure_ascii=None, indent=4):
         return Json._dump(
             self.data,
             path if path else self.path,
-            encoding=encoding if encoding else self.encoding
+            encoding=encoding if encoding else self.encoding,
+            ensure_ascii=ensure_ascii if ensure_ascii else self.ensure_ascii,
+            indent=indent
         )
 
-    def load(self, path=None, encoding=None):
+    def load(self, path=None, encoding=None, ensure_ascii=None):
         self.data = Json._load(
             path if path else self.path,
-            encoding=encoding if encoding else self.encoding
+            encoding=encoding if encoding else self.encoding,
+            ensure_ascii=ensure_ascii if ensure_ascii else self.ensure_ascii
         )
 
     @classmethod
-    def _dump(cls, obj, path, encoding=None):
+    def _dump(cls, obj, path, encoding=None, ensure_ascii=None, indent=4):
         with open(path, 'w', encoding=encoding) as handler:
-            return json.dump(obj, handler, indent=4)
+            return json.dump(obj, handler, ensure_ascii=ensure_ascii, indent=indent)
 
     @classmethod
-    def _load(cls, path, encoding=None):
+    def _load(cls, path, encoding=None, ensure_ascii=None):
         with open(path, encoding=encoding) as handler:
-            return json.load(handler)
+            return json.load(handler, ensure_ascii=ensure_ascii)
 
     def __setitem__(self, key, value):
         self.data[key] = value
@@ -180,6 +184,8 @@ class IMDB(WebDriver):
             time.sleep(1)
 
         data.dump()  # finally ensuring save of data
+
+        print(f"\nThe <{title}> is fetched now!\n")
 
         # move the movie into created folder
         source = os.path.join(PATH, filename)
