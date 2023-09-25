@@ -144,7 +144,7 @@ class IMDB(WebDriver):
 
         # The main movie page
         name = self.driver.find_element(By.TAG_NAME, 'h1').text
-        folder_path = os.path.join(os.getcwd(), name)
+        folder_path = os.path.join(PATH, name)
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
 
@@ -193,9 +193,10 @@ if __name__ == "__main__":
         print(f'ERROR: the file {CONFIG_PATH} does not exist!')
         exit()
 
-    PATH = config['General']['PATH']
+    PATH = os.path.normpath(config['General']['PATH'])
     MAX_THREADS = int(config['General']['MAX_THREADS'])
-    TITLES = list(map(get_movie_name, os.listdir(PATH)))
+    FILES = os.listdir(PATH)
+    TITLES = list(map(get_movie_name, FILES))
     NAMES = TITLES.copy()
 
     if MAX_THREADS == 0:
