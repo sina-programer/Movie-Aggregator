@@ -12,6 +12,7 @@ import pygetwindow as gw
 import datetime as dt
 import configparser
 import requests
+import shutil
 import time
 import json
 import os
@@ -148,9 +149,9 @@ class IMDB(WebDriver):
         if not os.path.exists(folder_path):
             os.mkdir(folder_path)
 
-        idx = NAMES.index(title)
-        NAMES.pop(idx)
-        NAMES.insert(idx, name)
+        idx = TITLES.index(title)
+        NAMES[idx] = name
+        filename = FILES[idx]
 
         data = Json(os.path.join(folder_path, 'data.json'))
         data['name'] = name
@@ -172,6 +173,10 @@ class IMDB(WebDriver):
             time.sleep(1)
 
         data.dump()
+
+        source = os.path.join(PATH, filename)
+        destination = os.path.join(folder_path, filename)
+        Thread(target=shutil.move, args=(source, destination)).start()
 
 
 
